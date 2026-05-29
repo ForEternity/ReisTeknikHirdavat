@@ -6,22 +6,35 @@ using ReisTeknikHirdavat.Persistence.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext Bağlantısı
-// DbContext'i interface olarak da kaydet
-builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+// ==========================================
+// 1. VERİTABANI VE CONTEXT KAYITLARI (DOĞRU SIRALAMA)
+// ==========================================
+
+// ÖNCE: Somut sınıfı (ApplicationDbContext) veritabanı bağlantısıyla kaydediyoruz
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// SONRA: Interface çağrıldığında yukarıda kaydettiğimiz somut sınıfı vermesini söylüyoruz
+builder.Services.AddScoped<IApplicationDbContext>(provider =>
+    provider.GetRequiredService<ApplicationDbContext>());
+
+
+// ==========================================
+// 2. MEDIATR VE SERVİS KAYITLARI
+// ==========================================
 
 // MediatR Kaydı (.NET 10 standardı - Application projesini taratıyoruz)
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(IApplicationDbContext).Assembly));
 
-// Servis Kayıtları (Dependency Injection)
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IMarketplaceService, TrendyolIntegrationService>();
-
 builder.Services.AddScoped<IPaymentService, PayTrPaymentService>();
 builder.Services.AddHostedService<MarketplaceOrderWorker>();
 
-// Lovable Frontend'in API'ye erişebilmesi için CORS Politikası (Production'da domaine daraltılacak)
-// Program.cs içerisindeki builder.Services.AddCors bloğunu şu şekilde güncelle:
+
+// ==========================================
+// 3. CORS VE HTTP GÜVENLİK POLİTİKALARI
+// ==========================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLovable", policy =>
@@ -38,19 +51,25 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+// ==========================================
+// 4. KONTROLÖRLER VE JSON YAPILANDIRMASI
+// ==========================================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles; // İlişkisel tabloların (Product-Image) sonsuz döngüye girmesini engeller.
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles; // Sonsuz döngü engelleme
     });
+
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+// ==========================================
+// 5. MIDDLEWARE HATTI (ÇALIŞMA SIRASI)
+// ==========================================
 app.UseCors("AllowLovable");
-
-
 app.UseAuthorization();
 app.MapControllers();
 

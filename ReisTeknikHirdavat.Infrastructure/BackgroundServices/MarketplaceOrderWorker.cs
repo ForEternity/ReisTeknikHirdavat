@@ -34,6 +34,8 @@ public class MarketplaceOrderWorker : BackgroundService
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+                   
+                        // Eğer burada somut sınıf yazıyorsa hata verir. Tam olarak şu şekilde IApplicationDbContext olmalı:
                     var marketplaceService = scope.ServiceProvider.GetRequiredService<IMarketplaceService>();
 
                     _logger.LogInformation("Trendyol yeni siparişler kontrol ediliyor...");

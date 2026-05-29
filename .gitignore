@@ -1,0 +1,13 @@
+## Visual Studio Önbellek ve İndeks Klasörleri (Kilitlenmeye sebep olan yer)
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.vsidx
+
+## Node.js / Lovable Client Önbellek Dosyaları
+node_modules/
+.env
+dist/
+.shelf/

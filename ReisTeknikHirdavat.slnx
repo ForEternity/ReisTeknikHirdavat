@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ReisTeknikHirdavat.Application/ReisTeknikHirdavat.Application.csproj" />
+  <Project Path="ReisTeknikHirdavat.Domain/ReisTeknikHirdavat.Domain.csproj" />
+  <Project Path="ReisTeknikHirdavat.Infrastructure/ReisTeknikHirdavat.Infrastructure.csproj" />
+  <Project Path="ReisTeknikHirdavat.Persistence/ReisTeknikHirdavat.Persistence.csproj" />
+  <Project Path="ReisTeknikHirdavat.WebApi/ReisTeknikHirdavat.WebApi.csproj" />
+</Solution>

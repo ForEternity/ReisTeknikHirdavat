@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  reisteknik-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: reisteknik-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=ReisTeknikHirdavat2026!  # Güçlü bir şifre
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  reisteknik-api:
+    image: reisteknik-api
+    build:
+      context: .
+      dockerfile: ReisTeknikHirdavat.WebApi/Dockerfile
+    container_name: reisteknik-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=reisteknik-db;Database=ReisTeknikHirdavatDb;User Id=sa;Password=ReisTeknikHirdavat2026!;TrustServerCertificate=True;MultipleActiveResultSets=true
+    depends_on:
+      - reisteknik-db
+
+volumes:
+  mssql_data:

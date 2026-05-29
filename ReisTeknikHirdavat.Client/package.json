@@ -4,9 +4,9 @@
   "sideEffects": false,
   "type": "module",
  
-  "scripts": {
+ "scripts": {
   "dev": "vite",
-  "build": "tsr generate && tsc && vite build",
+  "build": "npx tsr generate && tsc && vite build",
   "lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
   "preview": "vite preview"
 },

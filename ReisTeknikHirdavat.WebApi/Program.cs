@@ -3,6 +3,9 @@ using ReisTeknikHirdavat.Application.Interfaces;
 using ReisTeknikHirdavat.Infrastructure.BackgroundServices;
 using ReisTeknikHirdavat.Infrastructure.Services;
 using ReisTeknikHirdavat.Persistence.Context;
+using ReisTeknikHirdavat.Application.Features.Orders.Queries.GetAdminDashboard; // Dashboard ve MediatR referansları için
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 

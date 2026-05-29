@@ -27,7 +27,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLovable", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:8080",   // Yerel test ortamı
+                "http://localhost:5000",   // Yerel test ortamı
                 "http://localhost:5173",   // Vite/React varsayılan portu
                 "https://lovable.dev",     // Lovable ana platformu
                 "https://reisteknik.com"   // Canlı domain (Production)

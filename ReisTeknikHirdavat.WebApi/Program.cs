@@ -52,12 +52,13 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddCors(o => o.AddPolicy("frontend", p =>
     p.WithOrigins(
-        "https://reisteknikhirdavat-production.up.railway.app/",
+        "https://reis-teknik-hirdavat.vercel.app/",
+        "https://reis-teknik-hirdavat-foreternitys-projects.vercel.app/",
+
         "https://reisteknik.com",
         "https://www.reisteknik.com",
                 "http://localhost:5000",   // Yerel test ortamı
-                "http://localhost:5173",   // Vite/React varsayılan portu
-                "https://lovable.dev"   // Lovable ana platformu
+                "http://localhost:5173"   // Vite/React varsayılan portu
       )
      .AllowAnyHeader()
      .AllowAnyMethod()

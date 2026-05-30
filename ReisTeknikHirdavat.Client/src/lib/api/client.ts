@@ -6,7 +6,10 @@
 import { toast } from "sonner";
 
 export const API_BASE_URL =
-  (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5000/api";
+ // (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5000/api";
+  (import.meta.env.VITE_API_URL as string | undefined) ?? "https://reisteknikhirdavat-production.up.railway.app/api";
+
+  const BASE_URL = '';
 
 export class ApiError extends Error {
   status: number;

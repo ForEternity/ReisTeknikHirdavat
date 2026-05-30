@@ -3,13 +3,18 @@
 // - Sends/receives JSON in camelCase (matches ASP.NET System.Text.Json defaults).
 // - Surfaces server-supplied { message } payloads via sonner toast on 4xx/5xx.
 
+
+  // Centralized HTTP client for the Reis Teknik .NET 10 Web API.
 import { toast } from "sonner";
-
-export const API_BASE_URL =
  // (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5000/api";
-  (import.meta.env.VITE_API_URL as string | undefined) ?? "https://reisteknikhirdavat-production.up.railway.app/api";
 
-  const BASE_URL = '';
+// Ortam değişkeni oyunlarını tamamen bitiren, doğrudan Railway'e kilitlenen kurumsal hamle:
+export const API_BASE_URL = "https://reisteknikhirdavat-production.up.railway.app/api";
+
+// Eğer local test yapmak istersen yarın öbür gün burayı açarsın şef:
+// export const API_BASE_URL = "http://localhost:5000/api";
+
+const BASE_URL = '';
 
 export class ApiError extends Error {
   status: number;

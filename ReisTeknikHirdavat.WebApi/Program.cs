@@ -43,16 +43,26 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLovable", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5000",   // Yerel test ortamı
-                "http://localhost:5173",   // Vite/React varsayılan portu
-                "https://lovable.dev",     // Lovable ana platformu
-                "https://reisteknik.com"   // Canlı domain (Production)
+
               )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // Güvenli çerez ve JWT geçişleri için şart
     });
 });
+builder.Services.AddCors(o => o.AddPolicy("frontend", p =>
+    p.WithOrigins(
+        "https://reisteknikhirdavat-production.up.railway.app/",
+        "https://reisteknik.com",
+        "https://www.reisteknik.com",
+                "http://localhost:5000",   // Yerel test ortamı
+                "http://localhost:5173",   // Vite/React varsayılan portu
+                "https://lovable.dev"   // Lovable ana platformu
+      )
+     .AllowAnyHeader()
+     .AllowAnyMethod()
+     .AllowCredentials()));   // wildcard "*" ile credentials ÇALIŞMAZ
+
 
 
 // ==========================================
@@ -72,7 +82,8 @@ var app = builder.Build();
 // ==========================================
 // 5. MIDDLEWARE HATTI (ÇALIŞMA SIRASI)
 // ==========================================
-app.UseCors("AllowLovable");
+app.UseCors("frontend");
+
 app.UseAuthorization();
 app.MapControllers();
 

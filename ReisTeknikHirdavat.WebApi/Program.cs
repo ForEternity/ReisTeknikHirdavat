@@ -15,9 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ÖNCE: Somut sınıfı (ApplicationDbContext) veritabanı bağlantısıyla kaydediyoruz
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// SONRA: Interface çağrıldığında yukarıda kaydettiğimiz somut sınıfı vermesini söylüyoruz
+// SONRA: Interface çağrıldığında yukarıda kaydettiğimiz somut sınıfı vermesini söylüyyoruz
 builder.Services.AddScoped<IApplicationDbContext>(provider =>
     provider.GetRequiredService<ApplicationDbContext>());
 
@@ -46,7 +46,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("frontend", policy =>
     {
         policy.WithOrigins(
-                "https://reisteknik.com",
+            "https://reis-teknik-hirdavat.vercel.app/", // Vercel dağıtım URL'si
+                "https://reisteknik.com",   
                 "https://www.reisteknik.com",
                 "http://localhost:5000",   // Yerel API test ortamı
                 "http://localhost:5173",   // Vite standart portu
@@ -80,5 +81,22 @@ app.UseCors("frontend");
 
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        // Veritabanı yoksa oluşturur ve bekleyen tüm migration'ları tıkır tıkır basar
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Veritabanı migration işlemi esnasında sinsi bir hata oluştu!");
+    }
+}
+
 
 app.Run();

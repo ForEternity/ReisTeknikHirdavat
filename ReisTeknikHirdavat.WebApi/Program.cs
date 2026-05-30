@@ -38,31 +38,25 @@ builder.Services.AddHostedService<MarketplaceOrderWorker>();
 // ==========================================
 // 3. CORS VE HTTP GÜVENLİK POLİTİKALARI
 // ==========================================
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLovable", policy =>
+    options.AddPolicy("frontend", policy =>
     {
         policy.WithOrigins(
-
+                "https://reis-teknik-hirdavat.vercel.app",
+                "https://reis-teknik-hirdavat-foreternitys-projects.vercel.app",
+                "https://reisteknik.com",
+                "https://www.reisteknik.com",
+                "http://localhost:5000",   // Yerel API test ortamı
+                "http://localhost:5173",   // Vite standart portu
+                "http://localhost:8080"    // Lovable / TanStack Start yerel portu (İŞTE BURASI!)
               )
-              .AllowAnyMethod()
               .AllowAnyHeader()
+              .AllowAnyMethod()
               .AllowCredentials(); // Güvenli çerez ve JWT geçişleri için şart
     });
 });
-builder.Services.AddCors(o => o.AddPolicy("frontend", p =>
-    p.WithOrigins(
-        "https://reis-teknik-hirdavat.vercel.app/",
-        "https://reis-teknik-hirdavat-foreternitys-projects.vercel.app/",
-
-        "https://reisteknik.com",
-        "https://www.reisteknik.com",
-                "http://localhost:5000",   // Yerel test ortamı
-                "http://localhost:5173"   // Vite/React varsayılan portu
-      )
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-     .AllowCredentials()));   // wildcard "*" ile credentials ÇALIŞMAZ
 
 
 

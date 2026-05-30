@@ -46,7 +46,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("frontend", policy =>
     {
         policy.WithOrigins(
-            "https://reis-teknik-hirdavat.vercel.app/", // Vercel dağıtım URL'si
+            "https://reisteknik-frontend.vercel.app", // Vercel dağıtım URL'si
                 "https://reisteknik.com",   
                 "https://www.reisteknik.com",
                 "http://localhost:5000",   // Yerel API test ortamı

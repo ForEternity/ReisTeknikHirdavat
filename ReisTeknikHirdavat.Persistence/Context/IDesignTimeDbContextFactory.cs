@@ -11,7 +11,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
         var connectionString =
             Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Host=localhost;Port=5432;Database=ReisTeknikHirdavatDb;Username=postgres;Password=agMiWZkfsnsdDRWSryyIUodFooTSdVoO";
+            ?? "postgresql://postgres:agMiWZkfsnsdDRWSryyIUodFooTSdVoO@eternity.railway.internal:5432/railway";
 
 
         optionsBuilder.UseNpgsql(NormalizePostgresConnectionString(connectionString));

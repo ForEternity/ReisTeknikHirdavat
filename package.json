@@ -1,8 +1,0 @@
-{
-  "name": "reisteknik-hirdavat-root",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "build": "cd ReisTeknikHirdavat.Client && npm run build"
-  }
-}

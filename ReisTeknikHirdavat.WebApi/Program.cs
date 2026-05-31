@@ -3,100 +3,129 @@ using ReisTeknikHirdavat.Application.Interfaces;
 using ReisTeknikHirdavat.Infrastructure.BackgroundServices;
 using ReisTeknikHirdavat.Infrastructure.Services;
 using ReisTeknikHirdavat.Persistence.Context;
-using ReisTeknikHirdavat.Application.Features.Orders.Queries.GetAdminDashboard; // Dashboard ve MediatR referansları için
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================================
-// 1. VERİTABANI VE CONTEXT KAYITLARI (DOĞRU SIRALAMA)
-// ==========================================
+// Railway port binding
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// ÖNCE: Somut sınıfı (ApplicationDbContext) veritabanı bağlantısıyla kaydediyoruz
+// PostgreSQL connection string normalize
+var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(rawConnectionString))
+{
+    throw new InvalidOperationException("DefaultConnection bulunamadı.");
+}
+
+var connectionString = NormalizePostgresConnectionString(rawConnectionString);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
-// SONRA: Interface çağrıldığında yukarıda kaydettiğimiz somut sınıfı vermesini söylüyyoruz
 builder.Services.AddScoped<IApplicationDbContext>(provider =>
     provider.GetRequiredService<ApplicationDbContext>());
 
-
-// ==========================================
-// 2. MEDIATR VE SERVİS KAYITLARI
-// ==========================================
-
-// MediatR Kaydı (.NET 10 standardı - Application projesini taratıyoruz)
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(IApplicationDbContext).Assembly));
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(IApplicationDbContext).Assembly));
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IMarketplaceService, TrendyolIntegrationService>();
 builder.Services.AddScoped<IPaymentService, PayTrPaymentService>();
 builder.Services.AddHostedService<MarketplaceOrderWorker>();
 
-
-// ==========================================
-// 3. CORS VE HTTP GÜVENLİK POLİTİKALARI
-// ==========================================
-
-
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", policy =>
     {
-        policy.WithOrigins(
-            "https://reisteknik-frontend.vercel.app", // Vercel dağıtım URL'si
-                "https://reisteknik.com",   
-                "https://www.reisteknik.com",
-                "http://localhost:5000",   // Yerel API test ortamı
-                "http://localhost:5173",   // Vite standart portu
-                "http://localhost:8080"    // Lovable / TanStack Start yerel portu
-              )
-              .SetIsOriginAllowed(origin => origin.EndsWith(".vercel.app")) // İŞTE SİHİRLİ DOKUNUŞ!
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // Güvenli çerez ve JWT geçişleri için şart
+        policy
+            .SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrWhiteSpace(origin))
+                    return false;
+
+                var uri = new Uri(origin);
+                return
+                    uri.Host.EndsWith(".vercel.app") ||
+                    origin == "https://reisteknik.com" ||
+                    origin == "https://www.reisteknik.com" ||
+                    origin == "http://localhost:5173" ||
+                    origin == "http://localhost:8080";
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
-// ==========================================
-// 4. KONTROLÖRLER VE JSON YAPILANDIRMASI
-// ==========================================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles; // Sonsuz döngü engelleme
+        options.JsonSerializerOptions.PropertyNamingPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
+
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// ==========================================
-// 5. MIDDLEWARE HATTI (ÇALIŞMA SIRASI)
-// ==========================================
 app.UseCors("frontend");
+
+app.MapGet("/", () => Results.Ok(new
+{
+    service = "Reis Teknik Hırdavat API",
+    status = "running",
+    environment = app.Environment.EnvironmentName,
+    time = DateTime.UtcNow
+}));
+
+app.MapHealthChecks("/health");
 
 app.UseAuthorization();
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
     try
     {
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        // Veritabanı yoksa oluşturur ve bekleyen tüm migration'ları tıkır tıkır basar
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.Migrate();
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Veritabanı migration işlemi esnasında sinsi bir hata oluştu!");
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Veritabanı migration işlemi sırasında hata oluştu.");
+        throw;
     }
 }
 
-
 app.Run();
+
+static string NormalizePostgresConnectionString(string connectionString)
+{
+    if (!connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) &&
+        !connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        return connectionString;
+    }
+
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':', 2);
+
+    var username = Uri.UnescapeDataString(userInfo[0]);
+    var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+    var database = uri.AbsolutePath.TrimStart('/');
+
+    return
+        $"Host={uri.Host};" +
+        $"Port={uri.Port};" +
+        $"Database={database};" +
+        $"Username={username};" +
+        $"Password={password};" +
+        $"Ssl Mode=Prefer;" +
+        $"Trust Server Certificate=true";
+}

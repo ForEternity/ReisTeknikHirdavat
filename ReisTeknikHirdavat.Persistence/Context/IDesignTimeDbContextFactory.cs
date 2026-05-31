@@ -9,9 +9,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
     {
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-        var connectionString =
-            Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "postgresql://postgres:agMiWZkfsnsdDRWSryyIUodFooTSdVoO@eternity.railway.internal:5432/railway";
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+           
 
 
         optionsBuilder.UseNpgsql(NormalizePostgresConnectionString(connectionString));

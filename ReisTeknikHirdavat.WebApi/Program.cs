@@ -102,7 +102,7 @@ using (var scope = app.Services.CreateScope())
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Veritabanı migration işlemi sırasında hata oluştu.");
-        throw;
+       // throw;
     }
 }
 

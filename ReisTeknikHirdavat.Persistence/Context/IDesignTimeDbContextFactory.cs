@@ -13,6 +13,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=ReisTeknikHirdavatDb;Username=postgres;Password=agMiWZkfsnsdDRWSryyIUodFooTSdVoO";
 
+
         optionsBuilder.UseNpgsql(NormalizePostgresConnectionString(connectionString));
 
         return new ApplicationDbContext(optionsBuilder.Options);

@@ -4,6 +4,9 @@ using ReisTeknikHirdavat.Infrastructure.BackgroundServices;
 using ReisTeknikHirdavat.Infrastructure.Services;
 using ReisTeknikHirdavat.Persistence.Context;
 
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Railway port binding

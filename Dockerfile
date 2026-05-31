@@ -2,12 +2,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0.6 AS base
 WORKDIR /app
 EXPOSE 8080
 
-
 FROM mcr.microsoft.com/dotnet/sdk:10.0.301 AS build
 WORKDIR /src
 
-
-FROM mcr.microsoft.com/dotnet/sdk:10.0.301 AS build
 
 # Katmanların bağımlılıklarını optimize etmek için csproj dosyalarını kopyalıyoruz
 COPY ["ReisTeknikHirdavat.WebApi/ReisTeknikHirdavat.WebApi.csproj", "ReisTeknikHirdavat.WebApi/"]

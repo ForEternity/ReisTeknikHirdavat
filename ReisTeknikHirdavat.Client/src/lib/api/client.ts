@@ -1,8 +1,10 @@
 import { toast } from "sonner";
 
 const rawApiBaseUrl =
-  (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
-  "http://localhost:5000/api";
+  (typeof import.meta.env !== "undefined"
+    ? import.meta.env.VITE_API_URL
+    : process.env.VITE_API_URL
+  )?.trim() || "https://reisteknikhirdavat-production.up.railway.app/api";
 
 export const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, "");
 

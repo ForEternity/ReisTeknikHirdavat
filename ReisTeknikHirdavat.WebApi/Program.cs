@@ -56,8 +56,8 @@ builder.Services.AddCors(options =>
                     origin == "http://localhost:8080";
             })
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowAnyMethod().
+             AllowCredentials();
     });
 });
 
